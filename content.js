@@ -147,14 +147,14 @@ function extractCompanyFromJobCard(jobCard) {
   
   for (const selector of selectors) {
     const element = jobCard.querySelector(selector);
-    if (element && element.textContent.trim()) {
+    if (element && element.textContent && element.textContent.trim()) {
       return element.textContent.trim();
     }
   }
   
   // Fallback: look for company links
   const links = jobCard.querySelectorAll('a[href*="/company/"]');
-  if (links.length > 0) {
+  if (links.length > 0 && links[0].textContent) {
     return links[0].textContent.trim();
   }
   
@@ -196,7 +196,7 @@ function addGlassdoorButton(jobCard, companyName) {
       glassdoorG.title = `No Glassdoor rating found for ${companyName} - Click to search again`;
       glassdoorG.style.color = '#6c757d'; // Gray for N/A
     } else {
-      glassdoorG.textContent = ` G (${storedRating})`;
+      glassdoorG.textContent = ` G (${String(storedRating)})`;
       glassdoorG.title = `Glassdoor rating: ${storedRating}/5 for ${companyName} - Click to update`;
       glassdoorG.style.color = '#0caa41'; // Green for ratings
     }
@@ -218,6 +218,8 @@ function addGlassdoorButton(jobCard, companyName) {
 
 // Function to update rating display when new rating is received
 function updateCompanyRatingDisplay(companyName, rating) {
+  if (!companyName || !rating) return; // Safety check
+  
   const glassdoorGs = document.querySelectorAll(`[data-company="${companyName}"]`);
   glassdoorGs.forEach(g => {
     if (rating === 'N/A') {
@@ -225,7 +227,7 @@ function updateCompanyRatingDisplay(companyName, rating) {
       g.title = `No Glassdoor rating found for ${companyName} - Click to search again`;
       g.style.color = '#6c757d'; // Gray for N/A
     } else {
-      g.textContent = ` G (${rating})`;
+      g.textContent = ` G (${String(rating)})`;
       g.title = `Glassdoor rating: ${rating}/5 for ${companyName} - Click to update`;
       g.style.color = '#0caa41'; // Green for ratings
     }

@@ -134,6 +134,14 @@ function addRatingForm() {
     buttonText.textContent = `Send ${value || 'N/A'} Rating`;
   });
   
+  // Add Enter key listener to submit when user presses Enter
+  ratingInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('send-rating-btn').click();
+    }
+  });
+  
   // Add hover effect
   const sendBtn = document.getElementById('send-rating-btn');
   sendBtn.addEventListener('mouseenter', () => {
@@ -145,34 +153,56 @@ function addRatingForm() {
 }
 
 function findFirstRating() {
-  // Look for rating elements on the page
-  const ratingSelectors = [
-    '[data-test="rating"]',
-    '[data-test*="rating"]',
-    '.css-1c77mya',
-    '.rating',
-    '.ratingNumber',
-    '[class*="rating"]',
-    '[class*="Rating"]',
-    '.OverallRating',
-    '.employer-rating',
-    '.stars',
-    '[class*="stars"]',
-    '[class*="Stars"]'
+  // Look for rating elements on the page, prioritizing Companies section
+  
+  // First, try to find company ratings specifically
+  const companyRatingSelectors = [
+    '.employer-card_employerRatingContainer__w93y9', // New specific selector for company cards
+    '[data-test="company-card"] [class*="rating"]',  // Any rating inside company card
+    '.CompanyCard_employerCardWrapper__H_LZN [class*="rating"]', // Rating in company wrapper
+    '.employer-card_employerContainer__welQ6 [class*="rating"]' // Rating in employer container
   ];
   
-  for (const selector of ratingSelectors) {
+  for (const selector of companyRatingSelectors) {
     const elements = document.querySelectorAll(selector);
     for (const element of elements) {
       const rating = extractRatingFromElement(element);
       if (rating) {
-        console.log('[Extension] Auto-detected rating:', rating, 'from element:', element);
         return rating;
       }
     }
   }
   
-  console.log('[Extension] No rating auto-detected');
+  // Second priority: look in main content but skip job sections
+  const companiesSection = document.querySelector('#MainCol, .mainContent, [data-test="employer-overview"]');
+  if (companiesSection) {
+    const generalRatingSelectors = [
+      '.rating-single-star_RatingSingleStarContainer__PEAtE',
+      '[data-test="rating"]',
+      '[data-test*="rating"]',
+      '.css-1c77mya',
+      '.rating',
+      '.ratingNumber',
+      '[class*="rating"]',
+      '[class*="Rating"]'
+    ];
+    
+    for (const selector of generalRatingSelectors) {
+      const elements = companiesSection.querySelectorAll(selector);
+      for (const element of elements) {
+        // Skip if this element is inside a job listing
+        if (element.closest('.job-search-card, .jobsSearch, [class*="job"], [data-test*="job"]')) {
+          continue;
+        }
+        const rating = extractRatingFromElement(element);
+        if (rating) {
+          return rating;
+        }
+      }
+    }
+  }
+  
+  // If we can't find a company rating, return null for N/A
   return null;
 }
 

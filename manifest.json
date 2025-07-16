@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Glassdoor Ratings on LinkedIn",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Instantly view Glassdoor company ratings while browsing LinkedIn job listings. One-click access to salary and culture data.",
   "permissions": [
     "activeTab",
